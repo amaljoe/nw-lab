@@ -1,0 +1,139 @@
+//Navaneeth Venu, S6 CS2, 44
+//MBT19CS084
+//Exp 5: Client Server COmmuniation using TCP
+
+//Server Program
+
+#include<stdio.h>
+#include<sys/types.h>
+#include<string.h>
+#include<unistd.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+
+
+void main()
+{
+	printf("Server Side\n");
+	
+	char buffer[50];
+	int sockfd,newsocket;
+	
+	struct sockaddr_in addr1,addr2;
+	
+	//CREATE LOCAL ADDRESS
+	addr1.sin_family=AF_INET; //IPv4 Internet protocols
+	addr1.sin_addr.s_addr=INADDR_ANY;
+	addr1.sin_port=3008;
+	
+	int s=sizeof(struct sockaddr_in);
+	
+	//CREATE A SOCKET (Communication endpoint)
+	sockfd=socket(AF_INET,SOCK_STREAM,0); //
+	//BIND SOCKET (Bind name to a socket)
+	bind(sockfd,(struct sockaddr*)&addr1,sizeof(addr1));
+	//LISTEN FOR REQUESTS
+	listen(sockfd,5);
+	//ACCEPT REQUEST
+	newsocket=accept(sockfd,(struct sockaddr*)&addr2,(&s));
+	
+	do
+	{
+	     printf("\nConnection Established.\n");
+	     printf("\nRecieving message from Client:\n");
+	     
+	     //RECIEVE MESSAGE (from socket)
+	     recv(newsocket,buffer,sizeof(buffer),0);
+	     printf("%s",buffer);
+	     
+	     printf("Enter a message to send to Client:\n");
+	     scanf("%s",buffer);
+	     
+	     //SEND A MESSAGE (on Socket)    
+	     send(newsocket,buffer,sizeof(buffer),0);
+
+	}
+	while(strcmp(buffer,"stop")!=0);
+	
+	close(newsocket);
+	close(sockfd);
+}
+
+//Client Program
+
+#include<stdio.h>
+#include<sys/types.h>
+#include<string.h>
+#include<unistd.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+void main()
+{
+	printf("Client Side\n");
+	
+	char buffer[50];
+	int sockfd;
+	
+	struct sockaddr_in addr1,addr2;
+	
+	
+	//CREATE LOCAL ADDRESS
+	addr2.sin_family=AF_INET;
+	addr2.sin_addr.s_addr=INADDR_ANY;
+	addr2.sin_port=3008;
+	
+	//CREATE A SOCKET (Communication endpoint)
+	sockfd=socket(AF_INET,SOCK_STREAM,0);
+		
+	connect(sockfd,(struct sockaddr *)&addr2,sizeof(addr2));
+
+	do
+	{
+		printf("\nEnter message to send to Server\n");
+		scanf("%s",buffer);
+		send(sockfd,buffer,sizeof(buffer),0);
+		printf("\nMessage sent to Server\n");
+		recv(sockfd,buffer,sizeof(buffer),0);
+		printf("\nRecieved from Server : %s\n",buffer);
+	}
+	while(strcmp(buffer,"stop")!=0);
+	
+	close(sockfd);
+}	
+
+//OUTPUT:
+
+Server O/P:
+
+Server Side
+
+Connection Established.
+
+Recieving message from Client:
+hiEnter a message to send to Client:
+nice
+
+Connection Established.
+
+Recieving message from Client:
+stopEnter a message to send to Client:
+stop
+
+Client O/P:
+
+Client Side
+
+Enter message to send to Server
+hi
+
+Message sent to Server
+
+Recieved from Server : nice
+
+Enter message to send to Server
+stop
+
+Message sent to Server
+
+Recieved from Server : stop
+

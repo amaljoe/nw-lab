@@ -1,0 +1,218 @@
+//EXP 9: Implement SMTP using TCP
+//Navaneeth Venu 44 S6CS2 MBT19CS084
+
+//SERVER:
+#include<stdio.h>
+#include<sys/types.h>
+#include<string.h>
+#include<unistd.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+
+void validate(char mail[], char domainType[100], char domain[]);
+
+
+struct
+{
+	char to[45], from[45], sub[45], message[200];
+} email;
+
+void main()
+{
+	printf("SMTP Program\nServer Side\n");
+	
+	char buffer[50], domain1[50]="", domain2[50]="";
+	int sockfd,newsocket;
+	
+	struct sockaddr_in addr1,addr2;
+	
+	//CREATE LOCAL ADDRESS
+	addr1.sin_family=AF_INET; //IPv4 Internet protocols
+	addr1.sin_addr.s_addr=INADDR_ANY;
+	addr1.sin_port=3008;
+	
+	int s=sizeof(struct sockaddr_in);
+	
+	//CREATE A SOCKET (Communication endpoint)
+	sockfd=socket(AF_INET,SOCK_STREAM,0); //
+	//BIND SOCKET (Bind name to a socket)
+	bind(sockfd,(struct sockaddr*)&addr1,sizeof(addr1));
+	//LISTEN FOR REQUESTS
+	listen(sockfd,5);
+	//ACCEPT REQUEST
+	newsocket=accept(sockfd,(struct sockaddr*)&addr2,(&s));
+	
+	while(1)
+	{
+	     printf("\nConnection Established.\n");
+	     
+	     //RECIEVE FROM SOCKET
+	     recv(newsocket, email.to, sizeof(email.to) , 0);
+	     recv(newsocket, email.from, sizeof(email.from) , 0);
+	     recv(newsocket, email.sub, sizeof(email.sub) , 0);
+	     recv(newsocket, email.message, sizeof(email.message) , 0);
+	     printf("\n\nClient Request Mail\nTo: %s\nFrom: %s\nSubject: %s\nMessage: %s\n", email.to, email.from, email.sub, email.message);
+	     
+	     
+	     validate(email.to,"Sender",domain1);
+	     send(newsocket, domain1, sizeof(domain1) , 0);
+	     validate(email.from,"Receipient",domain2);
+	     send(newsocket, domain2, sizeof(domain2) , 0);
+
+	}
+	
+	close(newsocket);
+	close(sockfd);
+}
+
+void validate(char mail[], char domainType[100], char domain[])
+{
+
+	int flag = 0, i=0,j=0;
+	while(mail[i]!='\0')
+	{
+		if(flag==1)
+		{
+			domain[j]=mail[i];
+			j++;
+		}
+		if(mail[i]=='@'&&flag==0)
+		{
+			flag=1;
+		}
+		i++;
+		
+	}
+	domain[j]='\0';
+	if((flag!=1)||(strcmp(domain,"")==0))
+	{
+		printf("Invalid %s Address\n",domainType);
+		strcpy(domain,"Invalid");
+	}
+
+}   
+	     
+	     
+//CLIENT
+
+//Navaneeth Venu, 44, S6CS2
+
+#include<stdio.h>
+#include<sys/types.h>
+#include<string.h>
+#include<unistd.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+
+struct
+{
+	char to[45], from[45], sub[45], msg[200];
+} email;
+
+void main()
+{
+	printf("SMTP Program\nClient Side\n");
+	
+	char domain1[500], domain2[500];
+	int sockfd;
+	
+	struct sockaddr_in client,server;
+	
+	
+	//CREATE LOCAL ADDRESS
+	server.sin_family=AF_INET;
+	server.sin_addr.s_addr=INADDR_ANY;
+	server.sin_port=3008;
+	
+	//CREATE A SOCKET (Communication endpoint)
+	sockfd=socket(AF_INET,SOCK_STREAM,0);
+	
+	//INITIATE SOCKETY CONNECTION AND TEST ERROR CONDITIONS
+	int errno = connect(sockfd,(struct sockaddr *)&server,sizeof(server));
+	if(errno == -1){
+		printf("\nConnection Failed.\n");
+		return;
+	}
+	else
+		printf("\nConnection Established\n");
+		
+
+
+	while(1)
+	{
+		strcpy(email.to,"\n");
+		strcpy(email.from,"\n");
+		//GET FIELDS (TO AND FROM ARE MANDATORY)
+		while(strcmp(email.to,"\n")==0)
+		{
+			printf("\nEnter Recipient Email:");
+			scanf("%s", email.to);
+		}
+		
+		while(strcmp(email.from,"\n")==0)
+		{
+			printf("Enter Sender Email:");
+			scanf("%s", email.from);
+		}
+		
+		printf("Enter Subject:");
+		scanf("%s", email.sub);
+		
+		printf("Enter Message:");
+		scanf("%s", email.msg);
+		
+		//printf("%s %s %s %s",email.to,email.from,email.sub,email.msg);
+		
+		send(sockfd,email.to,sizeof(email.to),0);
+		send(sockfd,email.from,sizeof(email.from),0);
+		send(sockfd,email.sub,sizeof(email.sub),0);
+		send(sockfd,email.msg,sizeof(email.msg),0);
+		
+		//printf("%s %s %s %s",email.to,email.from,email.sub,email.msg);
+		
+		recv(sockfd, domain1, sizeof(domain1), 0);
+		recv(sockfd, domain2, sizeof(domain2), 0);
+		printf("\n\nDomain Name of Sender Address: %s\n", domain1);
+		printf("\n\nDomain Name of Recipient Address: %s\n", domain2);
+	}
+	
+	close(sockfd);
+}	
+
+//OUTPUT:
+
+CLIENT O/P:
+
+SMTP Program
+Client Side
+
+Connection Established
+
+Enter Recipient Email:hello@helo
+Enter Sender Email:what@
+Enter Subject:Subjx
+Enter Message:messx  
+hello@helo what@ Subjx messxhello@helo what@ Subjx messx
+
+Domain Name of Sender Address: helo
+
+
+Domain Name of Recipient Address: Invalid
+
+
+SERVER O/P:
+
+SMTP Program
+Server Side
+
+Connection Established.
+
+
+Client Request Mail
+To: hello@helo
+From: what@
+Subject: Subjx
+Message: messx
+Invalid Receipient Address
+
+Connection Established.
