@@ -9,8 +9,6 @@
 
 int main()
 {
-    FILE *dns = fopen("dns.txt", "r");
-
     char buf[MAX];
     char site[MAX];
     char ip[MAX];
@@ -27,6 +25,7 @@ int main()
         recvfrom(sock, buf, sizeof(buf), 0, (struct sockaddr *)&addr, &len);
         printf("Client DNS request: %s\n", buf);
         int found = 0;
+        FILE *dns = fopen("dns.txt", "r");
         while (fscanf(dns, "%s %s", site, ip) != EOF)
         {
             if (strcasecmp(buf, site) == 0)
@@ -35,12 +34,12 @@ int main()
                 sendto(sock, ip, sizeof(ip), 0, (struct sockaddr *)&addr, len);
                 break;
             }
-            sendto(sock, ip, sizeof(ip), 0, (struct sockaddr *)&addr, len);
         }
         if (!found)
         {
             sendto(sock, notfound, sizeof(notfound), 0, (struct sockaddr *)&addr, len);
         }
+        fclose(dns);
     }
     return 0;
 }

@@ -1,41 +1,49 @@
 // Amal Joe R S, Roll No. 64, CS2
 // Experiment 10
 
-#include<stdio.h>
-#include<limits.h>
+#include <stdio.h>
+#include <limits.h>
 
 #define N 20
 #define INFINITY 10000
 
-struct NODE {
+struct NODE
+{
 	int dist[N];
 	int from[N];
 } node[N];
 
-
-void main() {
+void main()
+{
 	int cost[N][N], i, j, k, nodes, count = 0;
 	printf("Enter the no. of nodes:");
-	scanf("%d",&nodes);
+	scanf("%d", &nodes);
 	printf("Enter the cost matrix : \n");
-	for(i = 0; i < nodes; i++) {
-		for(j = 0; j < nodes; j++) {
-			scanf("%d",&cost[i][j]);
-			
-			if(i != j && cost[i][j] == 0)
+	for (i = 0; i < nodes; i++)
+	{
+		for (j = 0; j < nodes; j++)
+		{
+			scanf("%d", &cost[i][j]);
+
+			if (i != j && cost[i][j] == 0)
 				cost[i][j] = INFINITY;
-			
+
 			node[i].dist[j] = cost[i][j];
 			node[i].from[j] = j;
 		}
 	}
-	
-	do {
+
+	do
+	{
 		count = 0;
-		for(i = 0; i < nodes; i++) {
-			for(j = 0 ; j < nodes; j++) {
-				for(k = 0; k < nodes; k++) {
-					if(node[i].dist[j] > cost[i][k] + node[k].dist[j]) {
+		for (i = 0; i < nodes; i++)
+		{
+			for (j = 0; j < nodes; j++)
+			{
+				for (k = 0; k < nodes; k++)
+				{
+					if (node[i].dist[j] > cost[i][k] + node[k].dist[j])
+					{
 						node[i].dist[j] = node[i].dist[k] + node[k].dist[j];
 						node[i].from[j] = k;
 						count++;
@@ -43,15 +51,17 @@ void main() {
 				}
 			}
 		}
-	
-	} while(count != 0);
-	
-	for(i = 0; i < nodes; i++) {
-		printf("\n\nRouting Table for node: %d\n", i+1);
+		printf("count: %d\n", count);
+	} while (count != 0);
+
+	for (i = 0; i < nodes; i++)
+	{
+		printf("\n\nRouting Table for node: %d\n", i + 1);
 		printf("%-5s | %-10s | %-10s\n", "To", "Next Hop", "Distance");
 		printf("--------------------------------------\n");
-		for(j = 0; j < nodes; j++) {
-			printf("%-5d | %-10d | %-10d\n", j+1, node[i].from[j] + 1, node[i].dist[j]);
+		for (j = 0; j < nodes; j++)
+		{
+			printf("%-5d | %-10d | %-10d\n", j + 1, node[i].from[j] + 1, node[i].dist[j]);
 		}
 	}
 	printf("\n\n");
@@ -69,7 +79,7 @@ INPUT
 /*
 OUTPUT
 Enter the no. of nodes:4
-Enter the cost matrix : 
+Enter the cost matrix :
 0 2 3 0
 2 0 1 3
 3 1 0 4
@@ -77,37 +87,37 @@ Enter the cost matrix :
 
 
 Routing Table for node: 1
-To    | Next Hop   | Distance  
+To    | Next Hop   | Distance
 --------------------------------------
-1     | 1          | 0         
-2     | 2          | 2         
-3     | 3          | 3         
-4     | 2          | 5         
+1     | 1          | 0
+2     | 2          | 2
+3     | 3          | 3
+4     | 2          | 5
 
 
 Routing Table for node: 2
-To    | Next Hop   | Distance  
+To    | Next Hop   | Distance
 --------------------------------------
-1     | 1          | 2         
-2     | 2          | 0         
-3     | 3          | 1         
-4     | 4          | 3         
+1     | 1          | 2
+2     | 2          | 0
+3     | 3          | 1
+4     | 4          | 3
 
 
 Routing Table for node: 3
-To    | Next Hop   | Distance  
+To    | Next Hop   | Distance
 --------------------------------------
-1     | 1          | 3         
-2     | 2          | 1         
-3     | 3          | 0         
-4     | 4          | 4         
+1     | 1          | 3
+2     | 2          | 1
+3     | 3          | 0
+4     | 4          | 4
 
 
 Routing Table for node: 4
-To    | Next Hop   | Distance  
+To    | Next Hop   | Distance
 --------------------------------------
-1     | 2          | 5         
-2     | 2          | 3         
-3     | 3          | 4         
-4     | 4          | 0  
+1     | 2          | 5
+2     | 2          | 3
+3     | 3          | 4
+4     | 4          | 0
 */
